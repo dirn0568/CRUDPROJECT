@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <title>게시판 목록</title>
+    <style>
+        table {
+            width: 100%;
+            border: 1px solid #444444;
+            border-collapse: collapse;
+        }
+        table th {
+            border: 1px solid #444444;
+            text-align: center;
+            height: 40px;
+            background-color: dodgerblue;
+            color: cornsilk;
+        }
+        table td {
+            border: 1px solid #444444;
+            text-align: center;
+        }
+    </style>
+</head>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // HTML 문서를 로드할 때마다 실행합니다.
+        getMessages();
+    })
+
+    function isValidContent(content) {
+        if (content == '') {
+            alert('내용을 입력해주세요');
+            return false;
+        }
+        if (content.trim().length > 140) {
+            alert('공백 포함 140자 이하로 입력해주세요');
+            return false;
+        }
+        return true;
+    }
+
+    function genRandomName(length) {
+        let result = '';
+        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            let number = Math.random() * charactersLength;
+            let index = Math.floor(number);
+            result += characters.charAt(index);
+        }
+        return result;
+    }
+
+    function addHTML(id, title, author, content, password, modifiedDate) {
+        let tempHtml = makeMessage(id, title, author, content, password, modifiedDate);
+        $('#cards-box').append(tempHtml);
+    }
+
+    function editPost(id) {
+        showEdits(id);
+        let tempHtml = `<input type="password" id="${id}-password">`;
+        $(`#${id}-passwordCheck`).append(tempHtml);
+        let content = $(`#${id}-textarea`).text().trim();
+        $(`#${id}-textarea`).val(content);
+    }
+
+    function showEdits(id) {
+        $(`#${id}-editarea`).show();
+        $(`#${id}-submit`).show();
+        $(`#${id}-delete`).show();
+
+        $(`#${id}-content`).hide();
+        $(`#${id}-edit`).hide();
+    }
+
+    function makeMessage(id, title, author, content, password, modifiedDate) {
+
+        return `<tr>
+                    <td style="width: 15%">
+                        <span class="date">
+                            ${modifiedDate}
+                        </span>
+                    </td>
+                    <td style="width: 20%">
+                        <span id="${id}-title" class="title">
+                            ${title}
+                        </span>
+                    </td>
+                    <td style="width: 15%">
+                        <span id="${id}-author" class="username">
+                            ${author}
+                        </span>
+                    </td>
+                    <td style="width: 20%">
+                        <!-- contents 조회/수정 영역-->
+                        <span id="${id}-content" class="text">
+                            ${content}
+                        </span>
+                    </td>
+                    <td style="width: 30%">
+                        <span class="footer">
+                        <img id="${id}-edit" class="icon-start-edit" src="/images/edit.png" alt="" onclick="editPost('${id}')">
+                        <img id="${id}-delete" class="icon-delete" src="/images/delete.png" alt="" onclick="deleteOne('${id}')">
+                        <img id="${id}-submit" class="icon-end-edit" src="/images/done.png" alt="" onclick="submitEdit('${id}')">
+                        </span>
+                        <span id="${id}-editarea" class="edit">
+                             <textarea id="${id}-textarea" class="te-edit" author="" id="" cols="30" rows="5"></textarea>
+                        </span>
+                        <span id="${id}-passwordCheck" class="text">
+                        </span>
+                        <button onclick="moveHtml(${id})">상세페이지</button>
+                    </td>
+                </tr>`;
+    }
+
+    function boardPost() {
+        // 1. 작성한 메모를 불러옵니다.
+        let title = $('#title').val();
+        let content = $('#content').val();
+        let password = $('#password').val();
+        // 2. 작성한 메모가 올바른지 isValidContents 함수를 통해 확인합니다.
+        // if (isValidContents(contents) == false) {
+        //     return;
+        // }
+        // 3. genRandomName 함수를 통해 익명의 username을 만듭니다.
+        let author = "user111";
+        // 4. 전달할 data JSON으로 만듭니다.
+        let data = {'title':title, 'author': author, 'content': content, 'password':password};
+        $.ajax({
+            type: "POST",
+            url: "/api/post",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function (response) {
+                alert('메시지가 성공적으로 작성되었습니다.');
+                window.location.reload();
+            }
+        });
+    }
+
+    function submitEdit(id) {
+        // 1. 작성 대상 메모의 username과 contents 를 확인합니다.
+        let author = $(`#${id}-author`).text().trim();
+        let content = $(`#${id}-textarea`).val().trim();
+        let password = $(`#${id}-password`).val().trim();
+
+        // 2. 작성한 메모가 올바른지 isValidContents 함수를 통해 확인합니다.
+        if (isValidContent(content) == false) {
+            return;
+        }
+
+        // 3. 전달할 data JSON으로 만듭니다.
+        let data = {'author': author, 'content': content, 'password': password};
+        // 4. PUT /api/memos/{id} 에 data를 전달합니다.
+        $.ajax({
+            type: "PUT",
+            url: `/api/post/${id}`,
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function (response) {
+                alert('메시지 변경에 성공하였습니다.');
+                window.location.reload();
+            }
+        });
+    }
+
+    // 메모를 불러와서 보여줍니다.
+    function getMessages() {
+        // 1. 기존 메모 내용을 지웁니다.
+        $('#cards-box').empty();
+
+        // 2. 메모 목록을 불러와서 HTML로 붙입니다.
+        $.ajax({
+            type: "GET",
+            url: "/api/posts",
+            data: {},
+            success: function (response) {
+                for (let i = 0; i < response.length; i++) {
+                    let message = response[i];
+                    let id = message['id'];
+                    let title = message['title'];
+                    let author = message['author'];
+                    let content = message['content'];
+                    let password = message['password'];
+                    let modifiedDate = message['modifiedDate'];
+                    addHTML(id, title, author, content, password, modifiedDate);
+                }
+            }
+        });
+    }
+    function deleteOne(id) {
+        let tempHtml = `<input type="password" id="${id}-password">
+                        <button onclick="deleteSubmit(${id})">삭제</button>`;
+        $(`#${id}-passwordCheck`).append(tempHtml);
+        $(`#${id}-submit`).hide();
+        $(`#${id}-delete`).hide();
+        $(`#${id}-edit`).hide();
+    }
+    function deleteSubmit(id) {
+        let password = $(`#${id}-password`).val().trim();
+
+        let data = {'password' : password};
+
+        $.ajax({
+            type: "DELETE",
+            url: `/api/post/${id}`,
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function (response) {
+                alert('메시지 삭제에 성공하였습니다.');
+                window.location.reload();
+            }
+        })
+    }
+
+    function moveHtml(id) {
+        location.href = `/api/post/${id}`;
+    }
+</script>
+<body>
+    <div style="text-align: center;">
+        <h1>게시판 목록</h1>
+        <table style="width: 1500px; margin: auto">
+            <tr>
+                <th style="width: 15%">날짜</th>
+                <th style="width: 20%">제목</th>
+                <th style="width: 15%">작성자</th>
+                <th style="width: 20%">내용</th>
+                <th style="width: 30%">옵션</th>
+                <!--                <th style="width: 10%">조회수</th>-->
+            </tr>
+        </table>
+        <table id="cards-box" style="width: 1500px; margin: auto">
+        </table>
+    </div>
+    <div style="width: 1500px; margin: auto; text-align: center;">
+        제목 : <input type="text" id="title" style="width: 20%">
+        <br>
+        <textarea id="content" style="width: 30%;" placeholder="내용"></textarea>
+        <br>
+        비밀번호 : <input type="password" id="password" style="width: 15%">
+        <br>
+        <input type="button" onclick="boardPost()" value="제출">
+    </div>
+</body>
+</html>
