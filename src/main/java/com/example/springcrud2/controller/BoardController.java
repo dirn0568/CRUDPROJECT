@@ -17,8 +17,10 @@ import java.util.*;
 
 import org.springframework.web.servlet.view.RedirectView;
 
-@RestController
-@RequiredArgsConstructor // 이게 뭘까???
+import javax.servlet.http.HttpServletRequest;
+
+@RestController // @ResponseBody + @Controller
+@RequiredArgsConstructor // final로 선언된거를 알아서 위치를 찾아줌(근데 생성자를 따로 만들어주는건가???)
 @RequestMapping("/")
 public class BoardController {
     private final BoardService boardService;
@@ -30,30 +32,28 @@ public class BoardController {
         mv.addObject("data", "123");
         return mv; // view + data passvariable
     }
-    @ResponseBody
-    @GetMapping("/api/posts") // dto로 바꿔라
+
+    @GetMapping("/api/posts")
     public List<BoardResponseDto> boardRead() {
         List<BoardResponseDto> boardResponseDto = boardService.readBoard();
         return boardResponseDto;
     }
 
-    @PostMapping("/api/post") // dto로 바꿔라 Board값을 리턴하면 DB자체를 보내는거라서 과부하 가능성이 높아짐
-    public BoardResponseDto boardCreate(@RequestBody BoardRequestDto boardRequestDto) {
-        Board board = boardService.createBoard(boardRequestDto);
+    @PostMapping("/api/post")
+    public BoardResponseDto boardCreate(@RequestBody BoardRequestDto boardRequestDto, HttpServletRequest request) {
+        Board board = boardService.createBoard(boardRequestDto, request);
         BoardResponseDto boardResponseDto = new BoardResponseDto(board);
         return boardResponseDto;
     }
 
-    @PutMapping("/api/post/{id}") // dto로 바꿔라
-    public BoardResponseDto boardUpdate(@PathVariable Long id, @RequestBody BoardRequestDto boardRequestDto) {
-        return boardService.updateBoard(id, boardRequestDto);
+    @PutMapping("/api/post/{id}")
+    public BoardResponseDto boardUpdate(@PathVariable Long id, @RequestBody BoardRequestDto boardRequestDto, HttpServletRequest request) {
+        return boardService.updateBoard(id, boardRequestDto, request);
     }
 
     @DeleteMapping("/api/post/{id}") // dto로 바꿔라
-    public Map boardDelete(@PathVariable Long id, @RequestBody BoardRequestDto boardRequestDto) {
-        Map deleteMessage = new HashMap<String, Boolean>();
-        deleteMessage = boardService.deleteBoard(id, boardRequestDto);
-        return deleteMessage;
+    public Map boardDelete(@PathVariable Long id, HttpServletRequest request) {
+        return boardService.deleteBoard(id, request);
     }
 
 
@@ -63,8 +63,23 @@ public class BoardController {
         return boardResponseDto;
     }
 
-    /*@GetMapping("api/post/{id}")
-    public redirect RedirectView moveDetail() {
-        return "redirect:api/post/{id}";
-    }*/
+//    @GetMapping("api/post/{id}")
+//    public ModelAndView boardDetail(@PathVariable Long id) {
+//        ModelAndView mv = new ModelAndView("detail2");
+//        Board board = new Board();
+//        board.setTitle("너를떠올리지않게");
+//        //List<Board> boards = new ArrayList<>();
+//        //boards.add(board);
+//        Board board2 = new Board();
+//        board2.setTitle("떨어지는날 잡아줘");
+//        //boards.add(board2);
+//        Board board3 = new Board();
+//        board3.setTitle("헬로오오오오오옹");
+//        //boards.add(board3);
+//        mv.addObject("title", boards);
+//        mv.addObject("title1", boards.get(1));
+//        mv.addObject("title2", boards.get(2));
+//        mv.addObject("twotwo", "two");
+//        return mv;
+//    }
 }

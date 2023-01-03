@@ -3,13 +3,17 @@ package com.example.springcrud2.service;
 import com.example.springcrud2.dto.BoardRequestDto;
 import com.example.springcrud2.dto.BoardResponseDto;
 import com.example.springcrud2.entity.Board;
+import com.example.springcrud2.entity.Member;
+import com.example.springcrud2.jwt.JwtUtil;
 import com.example.springcrud2.repository.BoardRepository;
 
+import com.example.springcrud2.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,11 +25,18 @@ import java.util.*;
 @RequiredArgsConstructor // 이거는 또 뭘까
 public class BoardService {
     private final BoardRepository boardRepository;
+    private final MemberRepository memberRepository;
+    private final JwtUtil jwtUtil;
 
     @Transactional // 이거를 빼면 데이터 생성이 안되나????
-    public Board createBoard(BoardRequestDto boardRequestDto) {
-        Board board = new Board(boardRequestDto);
-        boardRepository.save(board);
+    public Board createBoard(BoardRequestDto boardRequestDto, HttpServletRequest request) {
+        String token = JwtUtil.getToken(request);
+        Board board = new Board();
+        if (jwtUtil.vaildation(token)) {
+            Optional<Member> member = memberRepository.findById(Long.parseLong(jwtUtil.getUserInfoFromToken(token).getSubject()));
+            board = new Board(boardRequestDto, member.get());
+            boardRepository.save(board);
+        }
         return board;
     }
 
@@ -41,38 +52,42 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardResponseDto updateBoard(Long id, BoardRequestDto boardRequestDto) {
-        System.out.println("어디서 막힌거지2");
-        Board board = boardRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("아이디가 존재하지 않음")
-        ); // Optional로 묶으면 사용 불가능! <- Optioanl 객체로 한번 묶어 줬기때문에 return 하거나 받을때 Optional 객체로 받거나 리턴해야함
-        if (board.getPassword().equals(boardRequestDto.getPassword())) {
-            System.out.println("같은지 확인완료");
-            board.BoardUpdate(boardRequestDto);
+    public BoardResponseDto updateBoard(Long id, BoardRequestDto boardRequestDto, HttpServletRequest request) {
+        String token = JwtUtil.getToken(request);
+        if (!jwtUtil.vaildation(token)) {
+            throw new IllegalArgumentException("올바른 아이디가 아닙니다.");
         }
-        System.out.println("같은지 확인안함");
-        BoardResponseDto boardResponseDto = new BoardResponseDto(board);
+        Optional<Member> member = memberRepository.findById(Long.parseLong(jwtUtil.getUserInfoFromToken(token).getSubject()));
+        Optional<Board> board = boardRepository.findById(id);
+        if (!board.get().getMember().equals(member.get())) {
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
+        board.get().BoardUpdate(boardRequestDto);
+        BoardResponseDto boardResponseDto = new BoardResponseDto(board.get());
         return boardResponseDto;
     }
 
-    public Map deleteBoard(Long id, BoardRequestDto boardRequestDto) {
-        Map deleteMessage = new HashMap<String, Boolean>();
-        Board board = boardRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("아이디가 존재하지 않음")
-        );
-        if (board.getPassword().equals(boardRequestDto.getPassword())) {
-            boardRepository.delete(board);
-            deleteMessage.put("success", true);
-        } else {
-            deleteMessage.put("fail", false);
+    public Map deleteBoard(Long id, HttpServletRequest request) {
+        Map deleteMessage = new HashMap<Integer, Integer>();
+        String token = JwtUtil.getToken(request);
+        if (!jwtUtil.vaildation(token)) {
+            throw new IllegalArgumentException("올바른 아이디가 아닙니다.");
         }
+        Optional<Member> member = memberRepository.findById(Long.parseLong(jwtUtil.getUserInfoFromToken(token).getSubject()));
+        Optional<Board> board = boardRepository.findById(id);
+        if (!board.get().getMember().equals(member.get())) {
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
+        deleteMessage.put("msg", "게시물 삭제 성공");
+        deleteMessage.put("status", 200);
+        boardRepository.delete(board.get());
         return deleteMessage;
     }
 
     @Transactional // List<Board> -> List로 바꿔서 리턴해보기
     public BoardResponseDto detailBoard(Long id) {
         Board board = boardRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("아이디가 존재하지 않음")
+                () -> new IllegalArgumentException("게시물이 존재하지않음")
         );
         BoardResponseDto boardResponseDto = new BoardResponseDto(board);
         return boardResponseDto;

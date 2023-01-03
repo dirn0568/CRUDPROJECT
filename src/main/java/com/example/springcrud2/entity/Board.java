@@ -5,12 +5,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Id;
+import javax.persistence.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,24 +18,20 @@ public class Board extends BaseTimeEntity{
     @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
     @Column
-    private String password;
-    @Column
     private String title;
-    @Column
-    private String author;
+    @ManyToOne
+    private Member member;
     @Column
     private String content;
 
-    public Board(BoardRequestDto boardRequestDto) {
-        this.password = boardRequestDto.getPassword();
+    public Board(BoardRequestDto boardRequestDto, Member member) {
         this.title = boardRequestDto.getTitle();
-        this.author = boardRequestDto.getAuthor();
         this.content = boardRequestDto.getContent();
+        this.member = member;
     }
 
     public void BoardUpdate(BoardRequestDto boardRequestDto) {
         this.title = boardRequestDto.getTitle();
-        this.author = boardRequestDto.getAuthor();
         this.content = boardRequestDto.getContent();
     }
 }

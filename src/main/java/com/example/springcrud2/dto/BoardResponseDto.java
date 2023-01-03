@@ -1,6 +1,7 @@
 package com.example.springcrud2.dto;
 
 import com.example.springcrud2.entity.Board;
+import com.example.springcrud2.entity.Member;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ public class BoardResponseDto {
     private long id;
     private String title;
     private String content;
-    private String author;
+    private String memberName;
 
     public BoardResponseDto(Board board) {
         this.createdAt = board.getCreatedAt();
@@ -20,6 +21,6 @@ public class BoardResponseDto {
         this.id = board.getId();
         this.title = board.getTitle();
         this.content = board.getContent();
-        this.author = board.getAuthor();
+        this.memberName = board.getMember().getName();
     }
 }

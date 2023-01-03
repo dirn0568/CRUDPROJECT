@@ -5,6 +5,23 @@
     <title>Title</title>
 </head>
 <body>
-    디테일2
+    타이틀
+    <h1 th:text="${title}"> : 번호</h1>
+    타이틀1
+    <h1 th:text="${title1}"> : 번호</h1>
+    타이틀2
+    <h1 th:text="${title2.getTitle()}"> : 번호</h1>
+    투투
+    <h1 th:text="${twotwo}"> : 번호</h1>
+    <!--    <h1 th:text="${mv}"> : 번호</h1>-->
+    mvc
+    <h1 th:text="${#mvc}"> : 번호</h1>
+
+    <div th:each="test : ${title}">
+        <div th:text="${test}"></div>
+        <div th:text="${test.getTitle()}"></div>
+        <hr>
+    </div>
+
 </body>
 </html>
