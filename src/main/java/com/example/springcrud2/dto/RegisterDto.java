@@ -5,7 +5,7 @@ import lombok.Getter;
 
 
 @Getter
-public class RegisterDto {
+public class RegisterDto { //
     Long id;
     String name;
     String pw;

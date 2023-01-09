@@ -4,7 +4,7 @@ import com.example.springcrud2.entity.Member;
 import lombok.Getter;
 
 @Getter
-public class LoginDto {
+public class LoginDto { //
     Long id;
     String name;
     String pw;

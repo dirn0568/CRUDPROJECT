@@ -5,6 +5,6 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class Test {
+public class Test { //
     private String tolll;
 }

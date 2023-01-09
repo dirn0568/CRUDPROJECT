@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
-//@ResponseBody // HTML을 못받음
+//@ResponseBody // HTML을 못받음/
 @Controller
 @RequiredArgsConstructor // 이게 뭘까???
 @RequestMapping("/test")

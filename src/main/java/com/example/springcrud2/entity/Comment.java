@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -26,6 +28,14 @@ public class Comment extends BaseTimeEntity{
     private Board board;
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
+    private List<LikeComment> LikeComments;
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
+    private List<Liked> Likeds;
+
+//    @Column ?? 이거 하나때문에 이게 데이터베이스에 저장이 안됐어 뭐지
+//    private Long like;
 
     //public Comment () {}
 

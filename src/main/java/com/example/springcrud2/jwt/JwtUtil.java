@@ -1,11 +1,15 @@
 package com.example.springcrud2.jwt;
 
+import com.example.springcrud2.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -26,6 +30,8 @@ public class JwtUtil {
     private Key key;
     @Value("${jwt.secret.key}") // application properties의 jwt.secret.key 값이 들어왔음
     private String secretKey;
+
+    private final UserDetailsServiceImpl userDetailsService;
     @PostConstruct
     public void init() {
         byte[] bytes = Base64.getDecoder().decode(secretKey);
@@ -46,12 +52,21 @@ public class JwtUtil {
     }
 
     public static String getToken(HttpServletRequest request) { // static과 non-static의 차이
+
         String token = request.getHeader("Authorization");
-        if (!(StringUtils.hasText("Bearer ") && token.startsWith("Bearer "))) {
-            throw new IllegalArgumentException("올바른 토큰 형식이 아닙니다."); // 이게 실행이 되면 올스톱 작용
+
+        if (token != null) {
+            System.out.println("아니 애초에 토큰이 있어??");
+            System.out.println(token);
+            if (!(StringUtils.hasText("Bearer ") && token.startsWith("Bearer "))) { // StringUtils = 그냥 문자열 찾는거 도와주는 라이브러리
+                System.out.println("설마 여기까지 옴???");
+                throw new IllegalArgumentException("올바른 토큰 형식이 아닙니다."); // 이게 실행이 되면 올스톱 작용
+            }
+            System.out.println("여기서 막혔을꺼 같은데2");
+            token = token.substring(7);
+            System.out.println("여기서 막혔을꺼 같은데3");
         }
-        System.out.println("저게 실행이 되면 이것는 실행이 안되나?????");
-        token = token.substring(7);
+
         return token;
     }
 
@@ -72,7 +87,14 @@ public class JwtUtil {
     }
 
     public Claims getUserInfoFromToken(String token) {
+        System.out.println("이 겟유저인폴ㄹ프롬토큰이 왜 실행이 되는거냐ㅓㅈ대ㅑ거ㅓㄱㅂ댜ㅐㅈ");
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody(); // 이건 또 뭘까
+    }
+
+    public Authentication createAuthentication(Long userId) { // 임포트가 안됨
+        System.out.println("이 인증은 대체 언제 시작이 되는거여@$#!#@!#!@#");
+        UserDetails userDetails = userDetailsService.loadUserByUserId(userId);
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
 //    public String createToken(String userPk, List<String> roles) {

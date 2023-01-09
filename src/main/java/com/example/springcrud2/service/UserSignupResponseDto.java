@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class UserSignupResponseDto<T> {
+public class UserSignupResponseDto<T> { //
 
     private int statusCode;
     private String responseMessage;

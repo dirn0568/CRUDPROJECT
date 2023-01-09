@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class MemberResponseDto {
+public class MemberResponseDto { //
     private Long id;
     private String name;
     private String pw;

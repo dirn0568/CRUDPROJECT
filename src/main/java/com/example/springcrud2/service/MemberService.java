@@ -1,10 +1,7 @@
 package com.example.springcrud2.service;
 
 import com.example.springcrud2.Enum.MemberEnum;
-import com.example.springcrud2.dto.LoginDto;
-import com.example.springcrud2.dto.MemberResponseDto;
-import com.example.springcrud2.dto.RegisterDto;
-import com.example.springcrud2.dto.ResponseDto;
+import com.example.springcrud2.dto.*;
 import com.example.springcrud2.entity.Member;
 import com.example.springcrud2.jwt.JwtUtil;
 import com.example.springcrud2.repository.MemberRepository;
@@ -12,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +25,8 @@ public class MemberService {
     private final JwtUtil jwtUtil; // 객체를 새로 생성하지않고 이걸 하면 사용이되네 뭐지???
 
     private final String ADMINTOKEN = "AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC";
+
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public MemberResponseDto findMember(Long id) {
@@ -52,33 +52,51 @@ public class MemberService {
 
     @Transactional
     // @ExceptionHandler 안쓰는거
-    public Map RegisterPost(@Valid Member member) {
-        Map registerMessage = new HashMap();
-        if (memberRepository.findByName(member.getName()).isPresent()) {
-            throw new IllegalArgumentException("이미 사용자가 있습니다.");
+    public ResponseDto RegisterPost(MemberRequestDto memberRequestDto) { // 여기에 @Valid를 넣으면 안됨???
+        //ResponseDto responseDto;
+
+        if (memberRepository.findByName(memberRequestDto.getName()).isPresent()) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "이미 사용자가 있습니다.");
+            //throw new IllegalArgumentException("이미 사용자가 있습니다.");
         }
-        if (member.getRole().equals(MemberEnum.ADMIN)) {
-            if (!member.getAdminToken().equals(ADMINTOKEN)) {
-                throw new IllegalArgumentException("관리자 토큰이 다릅니다.");
+
+        MemberEnum memberEnum = MemberEnum.MEMBER;
+
+        if (memberRequestDto.isRole()) {
+            if (!memberRequestDto.getAdminToken().equals(ADMINTOKEN)) {
+                System.out.println("이거 싱행안함?????");
+                return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "관리자 토큰이 다릅니다");
+                //throw new IllegalArgumentException("관리자 토큰이 다릅니다.");
             }
+            memberEnum = MemberEnum.ADMIN;;
         }
+
+        String username = memberRequestDto.getName();
+        String password = passwordEncoder.encode(memberRequestDto.getPw());
+
+        Member member = new Member(username, password, memberEnum);
+
         memberRepository.save(member);
-        registerMessage.put("msg", "회원가입 성공");
-        registerMessage.put("status", 200);
-        return registerMessage;
+
+        //responseDto = new ResponseDto(HttpStatus.OK.value(), "회원가입 성공", null);
+        return new ResponseDto(HttpStatus.OK.value(), "회원가입 성공");
     }
     @Transactional
-    public ResponseDto LoginPost(Member member, HttpServletResponse response) {
+    public ResponseDto LoginPost(@Valid MemberRequestDto memberRequestDto, HttpServletResponse response) {
         //Map loginMessage = new HashMap<Integer, Integer>();
         String jwtUtilToken = "";
-        if (memberRepository.findByNameAndPw(member.getName(), member.getPw()).isPresent()) {
-            Optional<Member> member1 = memberRepository.findByNameAndPw(member.getName(), member.getPw());
-            jwtUtilToken = jwtUtil.createToken(member1.get().getId());
-            ResponseDto responseDto = new ResponseDto(HttpStatus.OK.value(), "로그인 성공", null);
-            response.addHeader("Authorization", jwtUtilToken);
-            return responseDto;
+        String username = memberRequestDto.getName();
+        String password = memberRequestDto.getPw();
+
+        Optional<Member> member = memberRepository.findByName(username);
+
+        if (member.isEmpty() || !passwordEncoder.matches(password, member.get().getPw())) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "회원을 찾을 수 없습니다");
         }
-        ResponseDto responseDto = new ResponseDto(HttpStatus.OK.value(), "로그인 실패", null);
-        return responseDto;
+
+        jwtUtilToken = jwtUtil.createToken(member.get().getId());
+        response.addHeader("Authorization", jwtUtilToken);
+
+        return new ResponseDto(HttpStatus.OK.value(), "로그인 성공");
     }
 }

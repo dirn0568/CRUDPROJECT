@@ -2,11 +2,14 @@ package com.example.springcrud2.controller;
 
 import com.example.springcrud2.dto.BoardRequestDto;
 import com.example.springcrud2.dto.BoardResponseDto;
+import com.example.springcrud2.dto.ResponseDto;
 import com.example.springcrud2.entity.Board;
 import com.example.springcrud2.repository.BoardRepository;
+import com.example.springcrud2.security.UserDetailsImpl;
 import com.example.springcrud2.service.BoardService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -24,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/")
 public class BoardController {
     private final BoardService boardService;
-
     @GetMapping("/")
     public ModelAndView home() {
         ModelAndView mv = new ModelAndView();
@@ -40,20 +42,19 @@ public class BoardController {
     }
 
     @PostMapping("/api/post")
-    public BoardResponseDto boardCreate(@RequestBody BoardRequestDto boardRequestDto, HttpServletRequest request) {
-        Board board = boardService.createBoard(boardRequestDto, request);
-        BoardResponseDto boardResponseDto = new BoardResponseDto(board);
+    public BoardResponseDto boardCreate(@RequestBody BoardRequestDto boardRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
+        BoardResponseDto boardResponseDto = boardService.createBoard(boardRequestDto, userDetailsImpl);
         return boardResponseDto;
     }
 
     @PutMapping("/api/post/{id}")
-    public BoardResponseDto boardUpdate(@PathVariable Long id, @RequestBody BoardRequestDto boardRequestDto, HttpServletRequest request) {
-        return boardService.updateBoard(id, boardRequestDto, request);
+    public BoardResponseDto boardUpdate(@PathVariable Long id, @RequestBody BoardRequestDto boardRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
+        return boardService.updateBoard(id, boardRequestDto, userDetailsImpl);
     }
 
-    @DeleteMapping("/api/post/{id}") // dto로 바꿔라
-    public Map boardDelete(@PathVariable Long id, HttpServletRequest request) {
-        return boardService.deleteBoard(id, request);
+    @DeleteMapping("/api/post/{id}")
+    public ResponseDto boardDelete(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
+        return boardService.deleteBoard(id, userDetailsImpl);
     }
 
 
@@ -63,7 +64,12 @@ public class BoardController {
         return boardResponseDto;
     }
 
-//    @GetMapping("api/post/{id}")
+    @PostMapping("api/boardlike/{id}")
+    public void boardLike(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
+        boardService.likeBoard(id, userDetailsImpl);
+    }
+
+///    @GetMapping("api/post/{id}")
 //    public ModelAndView boardDetail(@PathVariable Long id) {
 //        ModelAndView mv = new ModelAndView("detail2");
 //        Board board = new Board();

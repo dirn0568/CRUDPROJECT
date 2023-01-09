@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script>
+  function memberPost() {
+    let memberName = $('#memberName').val();
+    let password = $(`#password`).val();
+    let data = {'name':memberName, 'pw': password};
+    console.log(data);
+    $.ajax({
+      type: "POST",
+      url: "/api/login",
+      contentType: "application/json",
+      data: JSON.stringify(data),
+      success: function (response) {
+        alert('로그인이 성공적으로 진행되었습니다.');
+        window.location.reload();
+      }
+    });
+  }
+</script>
+<body>
+<h1>로그인</h1>
+<div style="width: 1500px; margin: auto; text-align: center;">
+  <input type="text" id="memberName" style="width: 20%">
+  <br>
+  <input type="text" id="password" style="width: 15%">
+  <br>
+  <input type="button" onclick="memberPost()" value="제출">
+</div>
+</body>
+</html>
