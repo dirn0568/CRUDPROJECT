@@ -55,6 +55,9 @@ public class MemberController {
     @PostMapping("/api/register")
     public ResponseDto RegisterPost(@RequestBody @Valid MemberRequestDto memberRequestDto) {
         ResponseDto responseDto = memberService.RegisterPost(memberRequestDto);
+        System.out.println("--------------------------------혹시 이거????????????--------------------------------");
+        System.out.println(responseDto);
+        System.out.println("--------------------------------혹시 이거????????????--------------------------------");
         return responseDto;
     }
 

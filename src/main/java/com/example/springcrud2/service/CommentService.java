@@ -55,8 +55,8 @@ public class CommentService {
     }
 
     // @Transactional
-    public Map deleteComment(Long id, UserDetailsImpl userDetailsImpl) {
-        Map deleteMessage = new HashMap<String, String>();
+    public Map<String, String> deleteComment(Long id, UserDetailsImpl userDetailsImpl) {
+        Map<String, String> deleteMessage = new HashMap<String, String>();
 
         Comment comment = commentRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
@@ -65,7 +65,7 @@ public class CommentService {
             throw new IllegalArgumentException("권한이 없습니다.");
         }
         deleteMessage.put("msg", "댓글 삭제 성공");
-        deleteMessage.put("status", 200);
+        deleteMessage.put("status", "200");
         commentRepository.delete(comment);
         return deleteMessage;
     }

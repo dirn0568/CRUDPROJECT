@@ -28,7 +28,7 @@ public class MemberService {
 
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
+    //@Transactional
     public MemberResponseDto findMember(Long id) {
         Member member = memberRepository.findById(id).orElseThrow(
                 () -> new NullPointerException("회원 상세조회 실패")
@@ -37,7 +37,7 @@ public class MemberService {
         return memberResponseDto;
     }
 
-    @Transactional
+    //@Transactional
     public List<MemberResponseDto> findAllMember() {
         List<Member> members = memberRepository.findAll();
         List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
@@ -82,7 +82,7 @@ public class MemberService {
         return new ResponseDto(HttpStatus.OK.value(), "회원가입 성공");
     }
     @Transactional
-    public ResponseDto LoginPost(@Valid MemberRequestDto memberRequestDto, HttpServletResponse response) {
+    public ResponseDto LoginPost(@Valid MemberRequestDto memberRequestDto, HttpServletResponse response) { // valid 빼는게 좋음
         //Map loginMessage = new HashMap<Integer, Integer>();
         String jwtUtilToken = "";
         String username = memberRequestDto.getName();
@@ -90,8 +90,12 @@ public class MemberService {
 
         Optional<Member> member = memberRepository.findByName(username);
 
-        if (member.isEmpty() || !passwordEncoder.matches(password, member.get().getPw())) {
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "회원을 찾을 수 없습니다");
+        if (member.isEmpty()) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "회원을 찾을 수 없습니다"); // 400(프론트), 500(서버) => AOP로 코드 줄이기
+        }
+
+        if (!passwordEncoder.matches(password, member.get().getPw())) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "비밀번호가 일치하지 않습니다"); // 400(프론트), 500(서버) => AOP로 코드 줄이기 // 메세지가 다르면 나눠주는게 좋음
         }
 
         jwtUtilToken = jwtUtil.createToken(member.get().getId());

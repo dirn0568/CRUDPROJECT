@@ -40,12 +40,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception { // Spring Security는 Servlet FilterChain을 자동으로 구성한 후 거치게 한다, Spring Security는 기본적으로 제공되는 Filter chain들이 존재하며, debug=true 옵션을 통해 chain들을 확인할 수 있다.
         http.csrf().disable(); // @EnableWebSecurity을 통해 자동으로 csrf를 방어하는 기능을 가졌지만 disable을 통해 꺼버렸다 -> why? 우리는 restapi로 설계했기 때문에 애시당초 csrf 공격을 받을 이유가 없었기 떄문에 꺼놨다?
-
+        //                .antMatchers("/").permitAll()
+//                .antMatchers("/api/post/**").permitAll()
+//                .antMatchers("/api/posts/**").permitAll() 이거 안해주면 계속 인증을 안해줘서 이상하게 됨
+//                .antMatchers("/api/comment/**").permitAll()
+//                .antMatchers("/member/**").permitAll()
+//                .antMatchers("/register").permitAll()
+//                .antMatchers("/login").permitAll()
+//                .antMatchers("/api/register/**").permitAll()
+//                .antMatchers("/api/login/**").permitAll()
+//                .antMatchers("/api/user/forbidden/**").permitAll()
+        //.anyRequest().permitAll()
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // SessionCreationPolicy.STATELESS = Spring Security는 HttpSession을 생성하지 않으며 SecurityContext를 가져오는 데 사용하지 않습니다 스프링시큐리티가 생성하지도않고 기존것을 사용하지도 않음 -> JWT 같은토큰방식을 쓸때 사용하는 설정
         System.out.println("시큐리티 콘피그 언제 실행되는거지????");
-        http.authorizeRequests().antMatchers("/api/register/**").permitAll()
-                .anyRequest().permitAll()
+        http.authorizeRequests().anyRequest().permitAll()
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
                 //.and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 //                .antMatchers("/api/user/**").permitAll() // 요청에 대한 권한 지정. Security 처리에 HttpServletRequest를 이용한다는 것을 의미한다.

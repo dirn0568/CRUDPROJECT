@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 
 @Getter
 public class MemberRequestDto {
-    Long id;
+    //Long id;
     @Size(min=4,max=10)
     @Pattern(regexp="^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]*$") // "^(?=.*[0-9])(?=.*[a-zA-Z])*$", "^[a-z0-9]*$", ^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]*$
     String name;

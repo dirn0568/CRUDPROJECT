@@ -24,18 +24,10 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController // @ResponseBody + @Controller
 @RequiredArgsConstructor // final로 선언된거를 알아서 위치를 찾아줌(근데 생성자를 따로 만들어주는건가???)
-@RequestMapping("/")
 public class BoardController {
     private final BoardService boardService;
-    @GetMapping("/")
-    public ModelAndView home() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("index"); //뷰의 이름
-        mv.addObject("data", "123");
-        return mv; // view + data passvariable
-    }
 
-    @GetMapping("/api/posts")
+    @GetMapping("/api/posts") // -> 공통된거 requestMapping
     public List<BoardResponseDto> boardRead() {
         List<BoardResponseDto> boardResponseDto = boardService.readBoard();
         return boardResponseDto;
@@ -64,7 +56,7 @@ public class BoardController {
         return boardResponseDto;
     }
 
-    @PostMapping("api/boardlike/{id}")
+    @PostMapping("api/boardlike/{id}") // -> -,/ 로 나눠주기 밑줄 이상한부분 고치기
     public void boardLike(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
         boardService.likeBoard(id, userDetailsImpl);
     }

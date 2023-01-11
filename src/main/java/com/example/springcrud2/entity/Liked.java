@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Liked {
+public class Liked { // Like 안에는 MEMBER, ID -> Like는 Board와 Comment 안에 넣어주기
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto로 하면 id값이 혼자서 올라가는데 IDENTITY로 바꾸니 id가 제대로 올라감 IDENTITY도 이상한데?
     Long id;

@@ -75,10 +75,10 @@ public class BoardService {
             throw new IllegalArgumentException("권한이 없습니다.");
         }
         boardRepository.delete(board.get());
-        return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "게시글 삭제 성공");
+        return new ResponseDto(HttpStatus.OK.value(), "게시글 삭제 성공");
     }
 
-    @Transactional // List<Board> -> List로 바꿔서 리턴해보기
+    //@Transactional // List<Board> -> List로 바꿔서 리턴해보기 // Transactional은 수정사항에?
     public BoardResponseDto detailBoard(Long id) {
         Board board = boardRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("게시물이 존재하지않음")

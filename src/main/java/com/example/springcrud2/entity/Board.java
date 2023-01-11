@@ -36,6 +36,10 @@ public class Board extends BaseTimeEntity{
     @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE) // 먼저 지우는 쪽에 cacade 적으면 되나????
     private List<Liked> Likeds;
 
+
+    //private Liked like1; OneToMany 또는 ManyToOne으로 연결시켜주기
+
+
     //@Column
     //@Transient
     //@ElementCollection // 리스트를 연관관계 없이 사용하고 싶을때 쓰는법 //@Transient DB테이블에 없으면 좋아요 기능 불가능!
