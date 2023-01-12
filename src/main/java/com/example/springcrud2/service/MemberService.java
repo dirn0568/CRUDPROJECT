@@ -82,7 +82,7 @@ public class MemberService {
         return new ResponseDto(HttpStatus.OK.value(), "회원가입 성공");
     }
     @Transactional
-    public ResponseDto LoginPost(@Valid MemberRequestDto memberRequestDto, HttpServletResponse response) { // valid 빼는게 좋음
+    public ResponseDto LoginPost(MemberRequestDto memberRequestDto, HttpServletResponse response) { // valid 빼는게 좋음
         //Map loginMessage = new HashMap<Integer, Integer>();
         String jwtUtilToken = "";
         String username = memberRequestDto.getName();

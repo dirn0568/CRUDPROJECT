@@ -22,9 +22,10 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor // requestmapping 공통되는거 빼주기
+@RequestMapping("/api")
 public class CommentController {
     private final CommentService commentService;
-    @PostMapping("/api/comment/{id}")
+    @PostMapping("/comment/{id}")
     public CommentResponseDto commentCreate(@PathVariable Long id,
                                             @RequestBody CommentRequestDto commentRequestDto,
                                             @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
@@ -32,7 +33,7 @@ public class CommentController {
         return commentResponseDto;
     }
 
-    @PutMapping("api/comment/{id}")
+    @PutMapping("/comment/{id}")
     public CommentResponseDto commentUpdate(@PathVariable Long id,
                                             @RequestBody CommentRequestDto commentRequestDto,
                                             @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
@@ -40,12 +41,12 @@ public class CommentController {
         return commentResponseDto;
     }
 
-    @DeleteMapping("api/comment/{id}")
+    @DeleteMapping("/comment/{id}")
     public Map<String, String> commentDelete(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
         return commentService.deleteComment(id, userDetailsImpl);
     }
 
-    @PostMapping("api/commentlike/{id}") // -,/
+    @PostMapping("/comment-like/{id}") // -,/
     public void commentLike(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
         commentService.likeComment(id, userDetailsImpl);
     }

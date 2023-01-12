@@ -24,39 +24,40 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController // @ResponseBody + @Controller
 @RequiredArgsConstructor // final로 선언된거를 알아서 위치를 찾아줌(근데 생성자를 따로 만들어주는건가???)
+@RequestMapping("/api")
 public class BoardController {
     private final BoardService boardService;
 
-    @GetMapping("/api/posts") // -> 공통된거 requestMapping
+    @GetMapping("/posts") // -> 공통된거 requestMapping
     public List<BoardResponseDto> boardRead() {
         List<BoardResponseDto> boardResponseDto = boardService.readBoard();
         return boardResponseDto;
     }
 
-    @PostMapping("/api/post")
+    @PostMapping("/post")
     public BoardResponseDto boardCreate(@RequestBody BoardRequestDto boardRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
         BoardResponseDto boardResponseDto = boardService.createBoard(boardRequestDto, userDetailsImpl);
         return boardResponseDto;
     }
 
-    @PutMapping("/api/post/{id}")
+    @PutMapping("/post/{id}")
     public BoardResponseDto boardUpdate(@PathVariable Long id, @RequestBody BoardRequestDto boardRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
         return boardService.updateBoard(id, boardRequestDto, userDetailsImpl);
     }
 
-    @DeleteMapping("/api/post/{id}")
+    @DeleteMapping("/post/{id}")
     public ResponseDto boardDelete(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
         return boardService.deleteBoard(id, userDetailsImpl);
     }
 
 
-    @GetMapping("api/post/{id}")
+    @GetMapping("/post/{id}")
     public BoardResponseDto boardDetail(@PathVariable Long id) {
         BoardResponseDto boardResponseDto = boardService.detailBoard(id);
         return boardResponseDto;
     }
 
-    @PostMapping("api/boardlike/{id}") // -> -,/ 로 나눠주기 밑줄 이상한부분 고치기
+    @PostMapping("/board-like/{id}") // -> -,/ 로 나눠주기 밑줄 이상한부분 고치기
     public void boardLike(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
         boardService.likeBoard(id, userDetailsImpl);
     }
