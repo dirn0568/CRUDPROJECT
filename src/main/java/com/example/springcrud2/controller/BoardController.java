@@ -55,7 +55,7 @@ public class BoardController {
     public BoardResponseDto boardDetail(@PathVariable Long id) {
         BoardResponseDto boardResponseDto = boardService.detailBoard(id);
         return boardResponseDto;
-    }
+    } //
 
     @PostMapping("/board-like/{id}") // -> -,/ 로 나눠주기 밑줄 이상한부분 고치기
     public void boardLike(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
